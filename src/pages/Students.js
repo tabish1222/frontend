@@ -1,32 +1,56 @@
 import React, { useEffect, useState } from "react";
-import { api } from "../api";
+import API from "../api";
 
 function Students() {
   const [students, setStudents] = useState([]);
+  const [form, setForm] = useState({ name: "", age: "" });
+  const role = localStorage.getItem("role");
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchStudents = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const res = await api.get("/api/students", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setStudents(res.data);
+        if (role === "parent") {
+          const res = await API.get("/students/my");
+          setStudents(res.data);
+        } else if (role === "teacher") {
+          const res = await API.get("/students");
+          setStudents(res.data);
+        }
       } catch (err) {
-        console.error(err);
+        alert("Failed to load students");
       }
     };
-    fetchData();
-  }, []);
+    fetchStudents();
+  }, [role]);
+
+  const addStudent = async (e) => {
+    e.preventDefault();
+    try {
+      await API.post("/students", form);
+      setForm({ name: "", age: "" });
+      const res = await API.get("/students/my");
+      setStudents(res.data);
+    } catch (err) {
+      alert("Error adding student");
+    }
+  };
 
   return (
-    <div style={{ margin: "50px" }}>
-      <h2>Students List</h2>
+    <div>
+      <h2>Students ({role})</h2>
+      {role === "parent" && (
+        <form onSubmit={addStudent}>
+          <input placeholder="Name" value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })} />
+          <input type="number" placeholder="Age" value={form.age}
+            onChange={(e) => setForm({ ...form, age: e.target.value })} />
+          <button type="submit">Add Student</button>
+        </form>
+      )}
+
       <ul>
         {students.map((s) => (
-          <li key={s.id}>
-            {s.name} - Grade {s.grade}
-          </li>
+          <li key={s.id}>{s.name} - Age {s.age}</li>
         ))}
       </ul>
     </div>
