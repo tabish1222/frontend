@@ -1,43 +1,33 @@
 import React, { useState } from "react";
-import { api } from "../api";
+import API from "../api";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [form, setForm] = useState({ email: "", password: "" });
+  const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await api.post("/api/auth/login", { email, password });
+      const res = await API.post("/auth/login", form);
       localStorage.setItem("token", res.data.token);
-      window.location.href = "/dashboard";
+      localStorage.setItem("role", res.data.role);
+      navigate("/students");
     } catch (err) {
-      setError("Invalid credentials");
+      alert(err.response?.data?.error || "Login failed");
     }
   };
 
   return (
-    <div style={{ margin: "50px" }}>
+    <div>
       <h2>Login</h2>
-      <form onSubmit={handleLogin}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        /><br />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        /><br />
+      <form onSubmit={handleSubmit}>
+        <input placeholder="Email" value={form.email}
+          onChange={(e) => setForm({ ...form, email: e.target.value })} /><br />
+        <input type="password" placeholder="Password" value={form.password}
+          onChange={(e) => setForm({ ...form, password: e.target.value })} /><br />
         <button type="submit">Login</button>
       </form>
-      {error && <p style={{ color: "red" }}>{error}</p>}
     </div>
   );
 }
