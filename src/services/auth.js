@@ -1,9 +1,12 @@
+// src/services/auth.js
 import { apiRequest } from "./api";
 
 export function register(user) {
-  return apiRequest("/auth/register", "POST", user);
+  // backend expects /api/auth/register
+  return apiRequest("/api/auth/register", "POST", user);
 }
 
 export function login(credentials) {
-  return apiRequest("/auth/login", "POST", credentials);
+  // backend expects /api/auth/login
+  return apiRequest("/api/auth/login", "POST", credentials);
 }
