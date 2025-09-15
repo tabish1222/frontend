@@ -1,3 +1,9 @@
-export function saveToken(token) { localStorage.setItem("jwt", token); }
-export function getToken() { return localStorage.getItem("jwt"); }
-export function clearToken() { localStorage.removeItem("jwt"); }
+import { apiRequest } from "./api";
+
+export function register(user) {
+  return apiRequest("/auth/register", "POST", user);
+}
+
+export function login(credentials) {
+  return apiRequest("/auth/login", "POST", credentials);
+}
