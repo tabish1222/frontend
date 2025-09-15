@@ -1,20 +1,19 @@
 import React, { useState } from "react";
-import API from "../api";
-import { useNavigate } from "react-router-dom";
+import { login } from "../services/auth";
 
-function Login() {
-  const [form, setForm] = useState({ email: "", password: "" });
-  const navigate = useNavigate();
+export default function Login({ setToken }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await API.post("/auth/login", form);
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("role", res.data.role);
-      navigate("/students");
+      const data = await login({ email, password });
+      setToken(data.token);
+      localStorage.setItem("token", data.token);
     } catch (err) {
-      alert(err.response?.data?.error || "Login failed");
+      setError(err.message);
     }
   };
 
@@ -22,14 +21,13 @@ function Login() {
     <div>
       <h2>Login</h2>
       <form onSubmit={handleSubmit}>
-        <input placeholder="Email" value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })} /><br />
-        <input type="password" placeholder="Password" value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })} /><br />
+        <input type="email" placeholder="Email" value={email}
+               onChange={(e) => setEmail(e.target.value)} />
+        <input type="password" placeholder="Password" value={password}
+               onChange={(e) => setPassword(e.target.value)} />
         <button type="submit">Login</button>
       </form>
+      {error && <p style={{color:"red"}}>{error}</p>}
     </div>
   );
 }
-
-export default Login;
