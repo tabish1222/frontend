@@ -1,72 +1,38 @@
+// src/pages/Register.js
 import React, { useState } from "react";
-import axios from "axios";
+import { register } from "../services/auth";
 
-function Register() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    role: "parent"
-  });
+export default function Register() {
+  const [form, setForm] = useState({ name: "", email: "", password: "", role: "parent" });
+  const [msg, setMsg] = useState("");
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = async (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
+    setMsg("");
     try {
-      const res = await axios.post(
-        `${process.env.REACT_APP_API_URL}/auth/register`,
-        formData
-      );
-      alert("User registered: " + res.data.message);
+      const res = await register(form); // returns { message, user }
+      setMsg(res.message || "Registered");
     } catch (err) {
-      console.error(err);
-      alert("Registration failed");
+      setMsg("Error: " + (err.message || "Registration failed"));
     }
   };
 
   return (
     <div>
       <h2>Register</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="name"
-          placeholder="Name"
-          value={formData.name}
-          onChange={handleChange}
-          required
-        />
-        <br />
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-        />
-        <br />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-          required
-        />
-        <br />
-        <select name="role" value={formData.role} onChange={handleChange}>
+      <form onSubmit={onSubmit}>
+        <input name="name" value={form.name} onChange={onChange} required />
+        <input name="email" type="email" value={form.email} onChange={onChange} required />
+        <input name="password" type="password" value={form.password} onChange={onChange} required />
+        <select name="role" value={form.role} onChange={onChange}>
           <option value="parent">Parent</option>
           <option value="teacher">Teacher</option>
         </select>
-        <br />
         <button type="submit">Register</button>
       </form>
+      {msg && <p>{msg}</p>}
     </div>
   );
 }
-
-export default Register;
