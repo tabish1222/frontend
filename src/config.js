@@ -1,2 +1,3 @@
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
-export default API_URL;
+// src/config.js
+const base = process.env.REACT_APP_API_URL || "http://localhost:10000";
+export default base.replace(/\/$/, ""); // remove trailing slash if any
