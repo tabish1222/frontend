@@ -1,60 +1,29 @@
 import React, { useEffect, useState } from "react";
-import API from "../api";
+import { getStudents, addStudent } from "../services/students";
 
-function Students() {
+export default function Students({ token }) {
   const [students, setStudents] = useState([]);
-  const [form, setForm] = useState({ name: "", age: "" });
-  const role = localStorage.getItem("role");
 
   useEffect(() => {
-    const fetchStudents = async () => {
+    async function fetchData() {
       try {
-        if (role === "parent") {
-          const res = await API.get("/students/my");
-          setStudents(res.data);
-        } else if (role === "teacher") {
-          const res = await API.get("/students");
-          setStudents(res.data);
-        }
+        const data = await getStudents(token);
+        setStudents(data);
       } catch (err) {
-        alert("Failed to load students");
+        console.error(err.message);
       }
-    };
-    fetchStudents();
-  }, [role]);
-
-  const addStudent = async (e) => {
-    e.preventDefault();
-    try {
-      await API.post("/students", form);
-      setForm({ name: "", age: "" });
-      const res = await API.get("/students/my");
-      setStudents(res.data);
-    } catch (err) {
-      alert("Error adding student");
     }
-  };
+    fetchData();
+  }, [token]);
 
   return (
     <div>
-      <h2>Students ({role})</h2>
-      {role === "parent" && (
-        <form onSubmit={addStudent}>
-          <input placeholder="Name" value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })} />
-          <input type="number" placeholder="Age" value={form.age}
-            onChange={(e) => setForm({ ...form, age: e.target.value })} />
-          <button type="submit">Add Student</button>
-        </form>
-      )}
-
+      <h2>Students</h2>
       <ul>
         {students.map((s) => (
-          <li key={s.id}>{s.name} - Age {s.age}</li>
+          <li key={s.id}>{s.name} - {s.class}</li>
         ))}
       </ul>
     </div>
   );
 }
-
-export default Students;
