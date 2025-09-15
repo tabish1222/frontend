@@ -1,14 +1,19 @@
-import axios from "axios";
+import API_URL from "../config";
 
-const API = axios.create({
-  baseURL: process.env.REACT_APP_BACKEND_URL || "https://your-backend.onrender.com"
-});
+export async function apiRequest(endpoint, method = "GET", body, token) {
+  const headers = { "Content-Type": "application/json" };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
 
-// attach token if available
-API.interceptors.request.use((req) => {
-  const token = localStorage.getItem("token");
-  if (token) req.headers.Authorization = `Bearer ${token}`;
-  return req;
-});
+  const res = await fetch(`${API_URL}${endpoint}`, {
+    method,
+    headers,
+    body: body ? JSON.stringify(body) : undefined,
+  });
 
-export default API;
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({ message: "API error" }));
+    throw new Error(error.message || "Something went wrong");
+  }
+
+  return res.json();
+}
